@@ -54,7 +54,7 @@ const support = {
                     discriminator: message.author.discriminator,
                 },
                 createDate: fullDate,
-                timestamp: d.getTime()
+                timestamp: d.getTime(),
             }
             model.setSupportIdByUser(message.author.id, channel.id)
 
@@ -89,7 +89,8 @@ const support = {
                 authorName: `Nouveau Ticket #${support.index}`,
                 authorIcon: defaultIcon,
                 color: colors.green,
-                description: "Votre demande a bien été prise en compte.\nNous reviendrons vers vous dans les plus brefs délais.",
+                description:
+                    'Votre demande a bien été prise en compte.\nNous reviendrons vers vous dans les plus brefs délais.',
             })
         }
         const isBlocked = await model.isSupportBlocked(supportChannel)
@@ -117,17 +118,20 @@ const support = {
             const isPaused = await model.isSupportPaused(channelId)
             const isBlocked = await model.isSupportBlocked(channelId)
             const isClosed = await model.isSupportClosed(channelId)
-            if (!message.content.startsWith('/anon ') && message.content.startsWith('/')) {
+            if (
+                !message.content.startsWith('/anon ') &&
+                message.content.startsWith('/')
+            ) {
                 this.bot.messageChannel({
                     embed: true,
                     authorName: `Azuria Support Bot`,
                     authorIcon: defaultIcon,
                     color: colors.orange,
                     channelId: channelId,
-                    description: "Commande incorrecte.",
+                    description: 'Commande incorrecte.',
                     attachments: null,
                 })
-            }else if (isBlocked) {
+            } else if (isBlocked) {
                 message.react('⛔')
             } else if (isPaused) {
                 message.react('⏳')
@@ -164,16 +168,14 @@ const support = {
     },
 
     onReceiveStatusMsg: async (message) => {
-
         const channelId = message.channel.id
         const support = await model.getSupport(channelId)
         if (support) {
-
             const sendStatus = async () => {
                 const user = await this.bot.client.users.fetch(support.user.id)
                 const status = await model.getSupportStatus(channelId)
                 const nbDays = diffDate(support.timestamp, Date.now())
-    
+
                 this.bot.messageChannel({
                     embed: true,
                     channelId: channelId,
@@ -250,13 +252,15 @@ const support = {
                         await model.deleteSupport(channelId)
                         await model.deleteSupportStatus(channelId)
 
-                        message.channel.setParent(secret.SUPPORT_ARCHIVED_CATEGORY)
+                        message.channel.setParent(
+                            secret.SUPPORT_ARCHIVED_CATEGORY
+                        )
 
                         msg = `Demande archivée.`
                         color = colors.purple
                     } else {
                         msg =
-                            "Cette demande est résolue.\nVous ne pouvez pas faire cette action."
+                            'Cette demande est résolue.\nVous ne pouvez pas faire cette action.'
                         color = colors.orange
                     }
                 } else {
@@ -341,6 +345,47 @@ const support = {
                     })
             }
         }
+    },
+    onReceiveHelpMsg: async (message) => {
+        const channelId = message.channel.id
+
+        this.bot.messageChannel({
+            embed: true,
+            channelId: channelId,
+            color: colors.yellow,
+            authorName: defaultUser,
+            authorIcon: defaultIcon,
+            fields: [
+                {
+                    name: '/status',
+                    value: `Afficher le statut d'un canal`,
+                },
+                {
+                    name: '/pause',
+                    value: `Mettre un canal en pause`,
+                },
+                {
+                    name: '/continue',
+                    value: `Réactiver un canal après une pause`,
+                },
+                {
+                    name: '/block',
+                    value: `Bloquer un utilisateur`,
+                },
+                {
+                    name: '/unblock',
+                    value: `Débloquer un utilisateur`,
+                },
+                {
+                    name: '/close',
+                    value: `Marquer une demande comme résolue`,
+                },
+                {
+                    name: '/archive',
+                    value: `Archiver une demande`,
+                },
+            ],
+        })
     },
 }
 module.exports = support
