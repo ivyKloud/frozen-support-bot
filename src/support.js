@@ -82,6 +82,15 @@ const support = {
                     },
                 ],
             })
+
+            this.bot.messageUser({
+                userId: message.author.id,
+                embed: true,
+                authorName: `Nouveau Ticket #${support.index}`,
+                authorIcon: defaultIcon,
+                color: colors.green,
+                description: "Votre demande a bien été prise en compte.\nNous reviendrons vers vous dans les plus brefs délais.",
+            })
         }
         const isBlocked = await model.isSupportBlocked(supportChannel)
 
