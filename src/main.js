@@ -32,6 +32,7 @@ client.on('message', (message) => {
         } else if (message.guild.id == secret.SUPPORT_GUILD) {
             if (
                 [
+                    '/take',
                     '/pause',
                     '/continue',
                     '/status',
@@ -42,8 +43,7 @@ client.on('message', (message) => {
                 ].includes(message.content)
             ) {
                 support.onReceiveStatusMsg(message)
-            }
-            else if (message.content === '/help') {
+            } else if (message.content === '/help') {
                 support.onReceiveHelpMsg(message)
             } else {
                 support.onReceiveSupportMsg(message)

@@ -171,9 +171,9 @@ const support = {
         const channelId = message.channel.id
         const support = await model.getSupport(channelId)
         if (support) {
+            const status = await model.getSupportStatus(channelId)
             const sendStatus = async () => {
                 const user = await this.bot.client.users.fetch(support.user.id)
-                const status = await model.getSupportStatus(channelId)
                 const nbDays = diffDate(support.timestamp, Date.now())
 
                 this.bot.messageChannel({
@@ -207,6 +207,7 @@ const support = {
             const isBlocked = await model.isSupportBlocked(channelId)
             const isPaused = await model.isSupportPaused(channelId)
             const isClosed = await model.isSupportClosed(channelId)
+            const msgTake = message.content === '/take'
             const msgPause = message.content === '/pause'
             const msgContinue = message.content === '/continue'
             const msgBlock = message.content === '/block'
@@ -264,7 +265,27 @@ const support = {
                         color = colors.orange
                     }
                 } else {
-                    if (msgPause) {
+                    if (msgTake) {
+                        if (isPaused) {
+                            msg =
+                                'Ce canal est en pause.\nVous ne pouvez pas faire cette action.'
+                            color = colors.orange
+                        } else if (status !== topics.waiting) {
+                            msg = "Cette demande n'est pas en attente."
+                            color = colors.orange
+                        } else {
+                            model.setSupportStatus(channelId, topics.open)
+                            message.channel.setParent(
+                                secret.SUPPORT_OPEN_CATEGORY
+                            )
+
+                            msg = 'Vous avez accepté cette demande.'
+                            color = colors.green
+                            newTopic = topics.open
+                            msgUser =
+                                'Votre demande a été prise en charge. \nMerci de patienter.'
+                        }
+                    } else if (msgPause) {
                         if (isPaused) {
                             msg = 'Ce canal est déjà en pause.'
                             color = colors.orange
@@ -346,6 +367,7 @@ const support = {
             }
         }
     },
+
     onReceiveHelpMsg: async (message) => {
         const channelId = message.channel.id
 
@@ -359,6 +381,14 @@ const support = {
                 {
                     name: '/status',
                     value: `Afficher le statut d'un canal`,
+                },
+                {
+                    name: '/anon + msg',
+                    value: `Envoyer un message anonymement`,
+                },
+                {
+                    name: '/take',
+                    value: `Prendre en charge un ticket`,
                 },
                 {
                     name: '/pause',
